@@ -32,6 +32,7 @@
 
 <script>
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 export default {
   data() {
@@ -56,7 +57,12 @@ export default {
 
       // console.log("응답 : ", res);
       const token = res.data.token;
+      const role = jwtDecode(token).role;
+      const email = jwtDecode(token).sub;
       localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+      localStorage.setItem("email", email);
+      
       window.location.href = "/";
     },
   },
