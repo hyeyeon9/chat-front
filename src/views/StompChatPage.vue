@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import SockJS from "sockjs-client";
 import Stomp from "webstomp-client";
 
@@ -47,10 +48,17 @@ export default {
     };
   },
   // 화면이 실행되자마자 실행되는 훅 함수 => created
-  created() {
+  async created() {
     this.senderEmail = localStorage.getItem("email");
-    this.connectWebSocket();
     this.roomId = this.$route.params.roomId; // url로 넘어오는 파람 변수를 받을 것
+
+    // 이전 메시지 불러오기
+    const res = await axios.get(
+      `${process.env.VUE_APP_API_BASE_URL}/chat/history/${this.roomId}`
+    );
+
+    this.messages = res.data;
+    this.connectWebSocket();
   },
   // 사용자가 현재 라우트에서 다른 라우트로 이동하려고 할 때 호출되는 훅함수
   beforeRouteLeave(to, from, next) {
@@ -76,12 +84,18 @@ export default {
           Authorization: `Bearer ${this.token}`,
         }, // 헤더값이 들어감
         () => {
-          this.stompClient.subscribe(`/topic/${this.roomId}`, (message) => {
-            const parseMessage = JSON.parse(message.body);
+          this.stompClient.subscribe(
+            `/topic/${this.roomId}`,
+            (message) => {
+              const parseMessage = JSON.parse(message.body);
 
-            this.messages.push(parseMessage); // 메시지를 넣음
-            this.scrollToBottom(); // 메시지 올때마다 같이 내려가게
-          });
+              this.messages.push(parseMessage); // 메시지를 넣음
+              this.scrollToBottom(); // 메시지 올때마다 같이 내려가게
+            },
+            {
+              Authorization: `Bearer ${this.token}`,
+            }
+          );
         }
       );
     },
