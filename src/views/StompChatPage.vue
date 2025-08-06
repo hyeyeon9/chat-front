@@ -62,13 +62,13 @@ export default {
   },
   // 사용자가 현재 라우트에서 다른 라우트로 이동하려고 할 때 호출되는 훅함수
   beforeRouteLeave(to, from, next) {
-    this.disconnectWebSockrt();
+    this.disconnectWebSocket();
     next();
   },
   // 화면이 사라지기 직전에 = beforeUnMounted
   // 화면을 완전히 꺼버렸을때
   beforeUnmount() {
-    this.disconnectWebSockrt();
+    this.disconnectWebSocket();
   },
   methods: {
     connectWebSocket() {
@@ -119,7 +119,12 @@ export default {
       });
     },
 
-    disconnectWebSockrt() {
+    async disconnectWebSocket() {
+      // 채팅방 나가게 되면 그동안의 메시지 읽음 처리하기
+       await axios.post(
+        `${process.env.VUE_APP_API_BASE_URL}/chat/room/${this.roomId}/read`
+      );
+
       if (this.stompClient && this.stompClient.connected) {
         this.stompClient.unsubscribe(`/topic/${this.roomId}`);
         this.stompClient.disconnect();
