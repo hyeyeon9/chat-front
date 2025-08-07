@@ -12,7 +12,11 @@
               >
             </div>
           </v-card-title>
-
+          <v-text-field
+            v-model="search"
+            class="mx-4 my-4 mb-2"
+            label="방제목을 검색하세요."
+          />
           <v-card-text>
             <v-table>
               <thead>
@@ -23,7 +27,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="chat in chatRoomList" :key="chat.roomId">
+                <tr v-for="chat in filteredMemberList" :key="chat.roomId">
                   <td>{{ chat.roomId }}</td>
                   <td>{{ chat.roomName }}</td>
 
@@ -67,11 +71,17 @@ export default {
       chatRoomList: [],
       showCreateRoomModal: false,
       newRoomTitle: "",
+      search: "",
     };
   },
   async created() {
     // axios는 자동으로 json 객체로 변환해줌
     this.loadChatRooms();
+  },
+  computed: {
+    filteredMemberList() {
+      return this.chatRoomList.filter((c) => c.roomName.includes(this.search));
+    },
   },
   methods: {
     // 채팅방 참여하기
@@ -88,7 +98,7 @@ export default {
         `${process.env.VUE_APP_API_BASE_URL}/chat/room/group/create?roomName=${this.newRoomTitle}`,
         null
       );
-      this.showCreateRoomModal = false;  // 모달 닫기
+      this.showCreateRoomModal = false; // 모달 닫기
       this.loadChatRooms(); // 채팅방 추가 후 재로드
     },
 
