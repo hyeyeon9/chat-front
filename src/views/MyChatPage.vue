@@ -74,6 +74,7 @@
 </template>
 
 <script>
+import { connectSSE, disconnectSSE } from "@/utils/sse";
 import { showToast } from "@/utils/toast";
 import axios from "axios";
 
@@ -83,6 +84,7 @@ export default {
       chatList: [],
       profileImageUrl: "",
       nickname: "",
+      unreadCounts: {},
     };
   },
   async created() {
@@ -96,11 +98,25 @@ export default {
       `${process.env.VUE_APP_API_BASE_URL}/member/me`
     );
 
-    console.log(member);
-
     this.nickname = member.data.name;
     this.profileImageUrl = member.data.profileImageUrl;
+
+    connectSSE((data) => {
+      // 예: { roomId: 5, unReadCount: 2 }
+      const { roomId, unReadCount } = data;
+
+      const targetChat = this.chatList.find((chat) => chat.roomId === roomId);
+      if (targetChat) {
+        targetChat.unReadCount = unReadCount;
+
+      }
+    });
   },
+
+  beforeUnmount() {
+    disconnectSSE();
+  },
+
   methods: {
     // 채팅방 입장하기
     enterChatRoom(roomId) {
@@ -154,8 +170,6 @@ export default {
             },
           }
         );
-        console.log("이미지");
-        console.log(res);
         this.profileImageUrl = res.data.profileImageUrl;
         showToast("프로필 수정 완료", "success");
       } catch (error) {
