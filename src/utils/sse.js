@@ -1,3 +1,5 @@
+import { EventSourcePolyfill } from "event-source-polyfill";
+
 let eventSource = null;
 const token = localStorage.getItem("token");
 
@@ -7,8 +9,14 @@ export function connectSSE(callback) {
     return;
   }
 
-  eventSource = new EventSource(
-    `${process.env.VUE_APP_API_BASE_URL}/sse/subscribe?token=${token}`
+  eventSource = new EventSourcePolyfill(
+    `${process.env.VUE_APP_API_BASE_URL}/sse/subscribe`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true,
+    }
   );
 
   eventSource.addEventListener("unread-count", (event) => {
