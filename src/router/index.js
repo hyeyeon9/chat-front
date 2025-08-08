@@ -5,9 +5,15 @@ import MemberList from "@/views/MemberList.vue";
 import MyChatPage from "@/views/MyChatPage.vue";
 import SimpleWebSocket from "@/views/SimpleWebSocket.vue";
 import StompChatPage from "@/views/StompChatPage.vue";
+import HomePage from "@/views/HomePage.vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 
 const routes = [
+  {
+    path: "/",
+    name: "HomePage",
+    component: HomePage,
+  },
   {
     path: "/member/create",
     name: "MemberCreate",
@@ -38,7 +44,7 @@ const routes = [
     name: "GroupChattingList",
     component: GroupChattingList,
   },
-    {
+  {
     path: "/my/chat/page",
     name: "MyChatPage",
     component: MyChatPage,
